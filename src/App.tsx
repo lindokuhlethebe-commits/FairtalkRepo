@@ -5,7 +5,7 @@ import {
   Headphones, Shield, Heart, 
   MapPin, Facebook, Twitter, Instagram,
   ChevronRight, ChevronLeft, Star, Map, X,
-  Newspaper, Users, Phone, Tv, ExternalLink,
+  Newspaper, Users, Phone, ExternalLink,
   Clock, Calendar, Mic2, Sun, Moon
 } from 'lucide-react';
 
@@ -70,27 +70,46 @@ const STATIONS: Record<string, Station> = {
   }
 };
 
+// --- Constants ---
+const NAV_ITEMS: { label: string, view: View }[] = [
+  { label: 'Home', view: 'home' },
+  { label: 'Stations', view: 'stations' },
+  { label: 'News', view: 'news' },
+  { label: 'About', view: 'about' },
+  { label: 'Contact', view: 'contact' },
+];
+
 // --- Components ---
 
-const Navbar = ({ setView, currentView, playStation }: { setView: (v: View) => void, currentView: View, playStation: (id: string) => void }) => {
-  const navItems: { label: string, view: View }[] = [
-    { label: 'Home', view: 'home' },
-    { label: 'Stations', view: 'stations' },
-    { label: 'News', view: 'news' },
-    { label: 'About', view: 'about' },
-    { label: 'Contact', view: 'contact' },
-  ];
+const Navbar = ({ 
+  setView, 
+  currentView, 
+  playStation,
+  isMenuOpen,
+  setIsMenuOpen
+}: { 
+  setView: (v: View) => void, 
+  currentView: View, 
+  playStation: (id: string) => void,
+  isMenuOpen: boolean,
+  setIsMenuOpen: (o: boolean) => void
+}) => {
+  const handleNavClick = (view: View) => {
+    setView(view);
+    setIsMenuOpen(false);
+  };
 
   return (
-    <nav className="w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 py-4 px-6 md:px-12 flex justify-between items-center border-b border-slate-100 dark:border-slate-800 transition-colors duration-500">
+    <nav className="w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-[60] py-4 px-6 md:px-12 flex justify-between items-center border-b border-slate-100 dark:border-slate-800 transition-all duration-500">
       <div 
-        className="cursor-pointer"
-        onClick={() => setView('home')}
+        className="cursor-pointer z-[70]"
+        onClick={() => handleNavClick('home')}
       >
-        <img src="/logo.png" alt="FairTalk Communications" className="h-10 md:h-12 w-auto object-contain dark:brightness-0 dark:invert transition-all" />
+        <img src="/logo.png" alt="FairTalk Communications" className="h-8 md:h-12 w-auto object-contain dark:brightness-0 dark:invert transition-all" />
       </div>
+
       <div className="hidden md:flex space-x-8 text-sm font-semibold text-slate-600 dark:text-slate-400">
-        {navItems.map((item) => (
+        {NAV_ITEMS.map((item) => (
           <button 
             key={item.view}
             onClick={() => setView(item.view)}
@@ -100,12 +119,35 @@ const Navbar = ({ setView, currentView, playStation }: { setView: (v: View) => v
           </button>
         ))}
       </div>
-      <button 
-        onClick={() => playStation('skyz')} 
-        className="bg-[#20388F] hover:bg-[#1a2d73] text-white px-6 py-2.5 rounded-full text-sm font-bold transition-colors shadow-md flex items-center gap-2"
-      >
-        <Play size={14} fill="currentColor" /> Listen Live
-      </button>
+
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={() => playStation('skyz')} 
+          className="hidden sm:flex bg-[#20388F] hover:bg-[#1a2d73] text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-md items-center gap-2"
+        >
+          <Play size={14} fill="currentColor" /> Listen Live
+        </button>
+
+        {/* Unique Hamburger Menu */}
+        <button 
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="md:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5 relative z-[210] focus:outline-none"
+          aria-label="Toggle Menu"
+        >
+          <motion.span 
+            animate={isMenuOpen ? { rotate: 45, y: 8, width: "100%" } : { rotate: 0, y: 0, width: "70%" }}
+            className="h-1 bg-[#20388F] dark:bg-[#F58220] rounded-full block transition-all origin-center self-end"
+          />
+          <motion.span 
+            animate={isMenuOpen ? { opacity: 0, x: -20 } : { opacity: 1, x: 0, width: "100%" }}
+            className="h-1 bg-[#F58220] dark:bg-slate-100 rounded-full block transition-all"
+          />
+          <motion.span 
+            animate={isMenuOpen ? { rotate: -45, y: -8, width: "100%" } : { rotate: 0, y: 0, width: "50%" }}
+            className="h-1 bg-[#20388F] dark:bg-[#F58220] rounded-full block transition-all origin-center self-end"
+          />
+        </button>
+      </div>
     </nav>
   );
 };
@@ -118,7 +160,7 @@ const Footer = ({ setView }: { setView: (v: View) => void }) => (
           <img src="/logo.png" alt="FairTalk Communications" className="h-10 md:h-12 w-auto object-contain dark:brightness-0 dark:invert opacity-90 transition-all" />
         </div>
         <p className="text-slate-400 dark:text-slate-500 text-sm leading-relaxed mb-6">
-          Zimbabwe's leading regional media group, connecting communities through Skyz Metro FM, Breeze FM, and Ke Yona TV.
+          Zimbabwe's leading regional media group, connecting communities through Skyz Metro FM and Breeze FM.
         </p>
         <div className="flex gap-4">
           <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#F58220] transition-colors"><Twitter size={18} /></a>
@@ -140,7 +182,6 @@ const Footer = ({ setView }: { setView: (v: View) => void }) => (
         <ul className="space-y-4 text-sm text-slate-400 dark:text-slate-500">
           <li><button onClick={() => setView('skyz')} className="hover:text-white dark:hover:text-[#F58220] transition-colors">Skyz Metro FM (Bulawayo)</button></li>
           <li><button onClick={() => setView('breeze')} className="hover:text-white dark:hover:text-[#F58220] transition-colors">Breeze FM (Vic Falls)</button></li>
-          <li><button onClick={() => setView('stations')} className="hover:text-white dark:hover:text-[#F58220] transition-colors">Ke Yona TV</button></li>
         </ul>
       </div>
       <div>
@@ -179,13 +220,6 @@ const HomeView = ({ setView, playStation }: { setView: (v: View) => void, playSt
       image: "https://images.unsplash.com/photo-1478147427282-58a87a120781?q=80&w=2072&auto=format&fit=crop",
       action: () => setView('breeze'),
       label: "Explore Breeze FM"
-    },
-    {
-      title: "Ke Yona TV",
-      desc: "Bringing local stories to your screen. Zimbabwe's upcoming commercial television station.",
-      image: "https://images.unsplash.com/photo-1493225457124-a1a2a5f09624?q=80&w=2072&auto=format&fit=crop",
-      action: () => setView('stations'),
-      label: "TV Schedule"
     }
   ];
 
@@ -209,27 +243,27 @@ const HomeView = ({ setView, playStation }: { setView: (v: View) => void, playSt
               className="absolute inset-0 w-full h-full"
             >
               <img src={slides[currentSlide].image} className="absolute inset-0 w-full h-full object-cover opacity-60" referrerPolicy="no-referrer" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center z-10 max-w-4xl px-4 mx-auto">
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-10 max-w-4xl px-6 mx-auto">
                 <motion.h1 
                   initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-                  className="text-5xl md:text-8xl font-black text-white tracking-tighter mb-6 drop-shadow-2xl"
+                  className="text-4xl sm:text-5xl md:text-8xl font-black text-white tracking-tighter mb-4 md:mb-6 drop-shadow-2xl"
                 >
                   {slides[currentSlide].title}
                 </motion.h1>
                 <motion.p 
                   initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
-                  className="text-white/90 text-lg md:text-2xl font-medium mb-10 max-w-2xl mx-auto"
+                  className="text-white/90 text-base sm:text-lg md:text-2xl font-medium mb-8 md:mb-10 max-w-2xl mx-auto"
                 >
                   {slides[currentSlide].desc}
                 </motion.p>
                 <motion.div 
                   initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}
-                  className="flex gap-4"
+                  className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
                 >
-                  <button onClick={slides[currentSlide].action} className="bg-[#F58220] text-white px-10 py-4 rounded-full font-bold hover:bg-[#d9721b] transition-all shadow-xl">
+                  <button onClick={slides[currentSlide].action} className="bg-[#F58220] text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-bold hover:bg-[#d9721b] transition-all shadow-xl">
                     {slides[currentSlide].label}
                   </button>
-                  <button onClick={() => playStation(currentSlide === 1 ? 'breeze' : 'skyz')} className="bg-[#20388F]/40 backdrop-blur-md border border-white/30 text-white px-10 py-4 rounded-full font-bold hover:bg-[#20388F]/60 transition-all">
+                  <button onClick={() => playStation(currentSlide === 1 ? 'breeze' : 'skyz')} className="bg-[#20388F]/40 backdrop-blur-md border border-white/30 text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-bold hover:bg-[#20388F]/60 transition-all">
                     Listen Now
                   </button>
                 </motion.div>
@@ -277,9 +311,9 @@ const HomeView = ({ setView, playStation }: { setView: (v: View) => void, playSt
           </div>
           <div className="space-y-6 pt-12">
             <div className="bg-[#20388F] dark:bg-slate-900 h-48 rounded-lg flex flex-col justify-end p-6 text-white transition-colors">
-              <Tv size={32} className="mb-4 text-[#F58220]" />
-              <div className="font-bold text-slate-100">Ke Yona TV</div>
-              <div className="text-xs text-white/60 dark:text-slate-400">Digital Broadcasting</div>
+              <Headphones size={32} className="mb-4 text-[#F58220]" />
+              <div className="font-bold text-slate-100">Digital Presence</div>
+              <div className="text-xs text-white/60 dark:text-slate-400">Online Streaming</div>
             </div>
             <div className="bg-blue-50 dark:bg-slate-900 h-64 rounded-lg overflow-hidden relative group transition-colors">
               <img src="https://images.unsplash.com/photo-1516280440502-a2fc9861e389?q=80&w=800" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -357,21 +391,6 @@ const StationsView = ({ setView }: { setView: (v: View) => void }) => (
           </div>
         </div>
       ))}
-    </div>
-
-    <div className="bg-[#20388F] dark:bg-slate-900 rounded-lg p-12 text-white flex flex-col md:flex-row items-center gap-12 shadow-2xl transition-colors duration-500">
-      <div className="w-24 h-24 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
-        <Tv size={48} className="text-[#F58220]" />
-      </div>
-      <div className="flex-1">
-        <h3 className="text-3xl font-black mb-4">Coming Soon: Ke Yona TV</h3>
-        <p className="text-white/60 dark:text-slate-400 max-w-2xl text-lg transition-colors">
-          Fairtalk Communications is expanding its digital footprint with Ke Yona TV. Zimbabwe's new commercial television station dedicated to local storytelling and high-quality programming.
-        </p>
-      </div>
-      <button className="bg-[#F58220] text-white px-10 py-4 rounded-full font-bold hover:bg-[#d9721b] transition-all shadow-xl">
-        Learn More
-      </button>
     </div>
   </div>
 );
@@ -814,6 +833,7 @@ export default function App() {
   const [activeStationId, setActiveStationId] = useState('skyz');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlayerVisible, setIsPlayerVisible] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const playStation = (id: string) => {
     setActiveStationId(id);
@@ -837,7 +857,62 @@ export default function App() {
 
   return (
     <div className={`min-h-screen font-sans selection:bg-[#F58220] selection:text-white pb-10 transition-colors duration-500 ${theme === 'dark' ? 'dark bg-slate-950 text-slate-100' : 'bg-white text-slate-900'}`}>
-      <Navbar setView={setView} currentView={view} playStation={playStation} />
+      <Navbar 
+        setView={setView} 
+        currentView={view} 
+        playStation={playStation} 
+        isMenuOpen={isMenuOpen} 
+        setIsMenuOpen={setIsMenuOpen} 
+      />
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-0 bg-white dark:bg-slate-950 z-[200] flex flex-col md:hidden"
+          >
+            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
+              <img src="/logo.png" alt="FairTalk" className="h-8 w-auto dark:brightness-0 dark:invert" />
+              <button 
+                onClick={() => setIsMenuOpen(false)}
+                className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
+              >
+                <X size={32} />
+              </button>
+            </div>
+
+            <div className="flex-1 flex flex-col justify-center px-10 space-y-8">
+              {NAV_ITEMS.map((item, idx) => (
+                <motion.button 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 + idx * 0.05 }}
+                  key={item.view}
+                  onClick={() => { setView(item.view); setIsMenuOpen(false); }}
+                  className="text-left group"
+                >
+                  <span className={`text-5xl font-black block transition-all ${view === item.view ? 'text-[#F58220] translate-x-4' : 'text-slate-800 dark:text-slate-100 group-hover:translate-x-2'}`}>
+                    {item.label}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+
+            <div className="p-10 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+              <button 
+                onClick={() => { playStation('skyz'); setIsMenuOpen(false); }}
+                className="w-full bg-[#20388F] text-white py-5 rounded-lg text-lg font-bold flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-transform"
+              >
+                <Play fill="currentColor" /> Listen Live Now
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       <main>
         <AnimatePresence mode="wait">
